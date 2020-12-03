@@ -81,6 +81,9 @@
 #define GLM_COMPILER_CUDA80			0x10000002
 #define GLM_COMPILER_CUDA90			0x10000004
 
+// HIP AMD
+#define GLM_COMPILER_HIP_AMD		0x600000D0
+
 // SYCL
 #define GLM_COMPILER_SYCL			0x00300000
 
@@ -136,6 +139,14 @@
 #elif defined(__SYCL_DEVICE_ONLY__)
 #	define GLM_COMPILER GLM_COMPILER_SYCL
 
+// HIP AMD
+#elif defined(__HIP__)
+#	if (__clang_major__ >= 4 && __clang_minor__ >= 3)  || (__clang_major__ > 4)
+#		define GLM_COMPILER GLM_COMPILER_HIP_AMD
+#	else
+#		error "GLM with HIP requires Clang 4.3 or higher"
+#	endif
+
 // Clang
 #elif defined(__clang__)
 #	if defined(__apple_build_version__)
@@ -173,6 +184,8 @@
 #			define GLM_COMPILER GLM_COMPILER_CLANG42
 #		endif
 #	endif
+
+
 
 // Visual C++
 #elif defined(_MSC_VER)

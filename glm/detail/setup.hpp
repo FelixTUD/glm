@@ -175,6 +175,7 @@
 #	define GLM_HAS_EXTENDED_INTEGER_TYPE (\
 		((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (GLM_COMPILER & GLM_COMPILER_VC)) || \
 		((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (GLM_COMPILER & GLM_COMPILER_CUDA)) || \
+		((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (GLM_COMPILER & GLM_COMPILER_HIP_AMD)) || \
 		((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (GLM_COMPILER & GLM_COMPILER_CLANG)))
 #endif
 
@@ -333,7 +334,8 @@
 #else
 #	define GLM_HAS_MAKE_SIGNED ((GLM_LANG & GLM_LANG_CXX0X_FLAG) && (\
 		((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_COMPILER >= GLM_COMPILER_VC12)) || \
-		((GLM_COMPILER & GLM_COMPILER_CUDA))))
+		((GLM_COMPILER & GLM_COMPILER_CUDA)) || \
+		((GLM_COMPILER & GLM_COMPILER_HIP_AMD))))
 #endif
 
 //
@@ -408,12 +410,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Qualifiers
 
-#if GLM_COMPILER & GLM_COMPILER_CUDA
-#	define GLM_CUDA_FUNC_DEF __device__ __host__
-#	define GLM_CUDA_FUNC_DECL __device__ __host__
+#if GLM_COMPILER & (GLM_COMPILER_CUDA | GLM_COMPILER_HIP_AMD)
+#	define GLM_GPU_FUNC_DEF __device__ __host__
+#	define GLM_GPU_FUNC_DECL __device__ __host__
 #else
-#	define GLM_CUDA_FUNC_DEF
-#	define GLM_CUDA_FUNC_DECL
+#	define GLM_GPU_FUNC_DEF
+#	define GLM_GPU_FUNC_DECL
 #endif
 
 #if defined(GLM_FORCE_INLINE)
@@ -423,7 +425,7 @@
 #	elif GLM_COMPILER & (GLM_COMPILER_GCC | GLM_COMPILER_CLANG)
 #		define GLM_INLINE inline __attribute__((__always_inline__))
 #		define GLM_NEVER_INLINE __attribute__((__noinline__))
-#	elif GLM_COMPILER & GLM_COMPILER_CUDA
+#	elif GLM_COMPILER & (GLM_COMPILER_CUDA | GLM_COMPILER_HIP_AMD)
 #		define GLM_INLINE __forceinline__
 #		define GLM_NEVER_INLINE __noinline__
 #	else
@@ -435,8 +437,8 @@
 #	define GLM_NEVER_INLINE
 #endif//defined(GLM_FORCE_INLINE)
 
-#define GLM_FUNC_DECL GLM_CUDA_FUNC_DECL
-#define GLM_FUNC_QUALIFIER GLM_CUDA_FUNC_DEF GLM_INLINE
+#define GLM_FUNC_DECL GLM_GPU_FUNC_DEF
+#define GLM_FUNC_QUALIFIER GLM_GPU_FUNC_DECL GLM_INLINE
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Swizzle operators
@@ -978,6 +980,10 @@ namespace detail
 #		pragma message("GLM: GCC compiler detected")
 #	else
 #		pragma message("GLM: Compiler not detected")
+#	endif
+
+#	if GLM_COMPILER & GLM_COMPILER_CLANG
+#		pragma message("GLM: HIP detected")
 #	endif
 
 	// Report build target
